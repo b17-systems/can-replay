@@ -1,5 +1,5 @@
 import can
-from typing import Iterable
+from collections.abc import Iterable
 
 from can_replay import replay_messages
 

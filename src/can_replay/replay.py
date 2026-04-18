@@ -1,8 +1,9 @@
 import copy
 import math
 import time
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, Protocol
+from typing import Protocol
 
 import can
 
@@ -28,39 +29,44 @@ def replay_messages(
     target_channel: str | None = None,
     clock: Callable[[], float] = time.perf_counter,
     sleep: Callable[[float], None] = time.sleep,
+    on_tick: Callable[[ReplayStats], None] | None = None,
 ) -> ReplayStats:
     stats = ReplayStats()
     log_zero_ts: float | None = None
     wall_zero_ts: float | None = None
 
     for msg in messages:
-        stats.total_frames += 1
-
-        if msg.is_rx is not True:
-            stats.dropped_tx_frames += 1
-            continue
-
-        timestamp = msg.timestamp
-        if timestamp is None or not math.isfinite(timestamp):
-            stats.skipped_invalid_timestamp_frames += 1
-            continue
-
-        if log_zero_ts is None:
-            log_zero_ts = timestamp
-            wall_zero_ts = clock()
-        else:
-            assert wall_zero_ts is not None
-            target = wall_zero_ts + (timestamp - log_zero_ts)
-            delay = target - clock()
-            if delay > 0:
-                sleep(delay)
-
         try:
-            outbound = copy.copy(msg)
-            outbound.channel = target_channel
-            bus.send(outbound)
-            stats.replayed_rx_frames += 1
-        except can.CanError:
-            stats.send_errors += 1
+            stats.total_frames += 1
+
+            if msg.is_rx is not True:
+                stats.dropped_tx_frames += 1
+                continue
+
+            timestamp = msg.timestamp
+            if timestamp is None or not math.isfinite(timestamp):
+                stats.skipped_invalid_timestamp_frames += 1
+                continue
+
+            if log_zero_ts is None:
+                log_zero_ts = timestamp
+                wall_zero_ts = clock()
+            else:
+                assert wall_zero_ts is not None
+                target = wall_zero_ts + (timestamp - log_zero_ts)
+                delay = target - clock()
+                if delay > 0:
+                    sleep(delay)
+
+            try:
+                outbound = copy.copy(msg)
+                outbound.channel = target_channel
+                bus.send(outbound)
+                stats.replayed_rx_frames += 1
+            except can.CanError:
+                stats.send_errors += 1
+        finally:
+            if on_tick is not None:
+                on_tick(stats)
 
     return stats
