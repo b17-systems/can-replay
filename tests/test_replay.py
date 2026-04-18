@@ -1,17 +1,7 @@
 import can
-import importlib.util
-from pathlib import Path
-import sys
 from typing import Iterable
 
-_SPEC = importlib.util.spec_from_file_location(
-    "can_replay_main",
-    Path(__file__).resolve().parents[1] / "main.py",
-)
-assert _SPEC is not None and _SPEC.loader is not None
-main = importlib.util.module_from_spec(_SPEC)
-sys.modules["can_replay_main"] = main
-_SPEC.loader.exec_module(main)
+from can_replay import replay_messages
 
 
 class FakeBus:
@@ -57,7 +47,7 @@ def test_replay_messages_sends_only_rx_and_drops_tx() -> None:
     fake_time = FakeTime()
     bus = FakeBus()
 
-    stats = main.replay_messages(
+    stats = replay_messages(
         messages,
         bus,
         clock=fake_time.clock,
@@ -81,7 +71,7 @@ def test_replay_messages_preserves_relative_timing() -> None:
     fake_time = FakeTime()
     bus = FakeBus()
 
-    main.replay_messages(
+    replay_messages(
         messages,
         bus,
         clock=fake_time.clock,
@@ -101,7 +91,7 @@ def test_replay_messages_skips_invalid_timestamps_and_counts_send_errors() -> No
     fake_time = FakeTime()
     bus = FakeBus(fail_on_ids={0x333})
 
-    stats = main.replay_messages(
+    stats = replay_messages(
         messages,
         bus,
         clock=fake_time.clock,
