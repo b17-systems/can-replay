@@ -1,0 +1,7214 @@
+{
+  "constants": {
+    "start_date": "",
+    "start_time": "",
+    "time_factor": 1.0,
+    "cyt": 10.0,
+    "click_ms": 200,
+    "d_click_ms": 400,
+    "impuls_ms": 200,
+    "emtr_time_min": 60,
+    "sort_crit": "ID",
+    "sort_order": "asc",
+    "plc_sort": "PLC",
+    "confirm_delete": 1
+  },
+  "plc": [
+    {
+      "ID": "BWWSPS1",
+      "Name": "BWW Zirk. Start/Stop",
+      "Description": "Ansteuerung der BWW-Zirkulationspumpe und Anforderung SSP-Nachladung",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "!(13_DI1 | BWWSW0) & (13_DI2 | BWWSW1 | BWWZP_OUT | LS17)",
+          "asgn": "=",
+          "res": "LS18"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS18 & !BWWCMP1_OUT",
+          "asgn": "=",
+          "res": "LS19"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS18",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS19",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "BWWSPS2",
+      "Name": "BWW 1-shot",
+      "Description": "Generierung der Anforderung für die einmalige Aufheizung der BWW-Leitung bis zur Abschaltung der Zirkulationspumpe",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "BWWTIM3_OUT | BWWSW1X",
+          "asgn": "SET",
+          "res": "LS17"
+        },
+        {
+          "cmnt": "",
+          "expr": "(LS18 & !LS19) | 13_DI1 | BWWSW0",
+          "asgn": "RST",
+          "res": "LS17"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS17",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "DI8SPS",
+      "Name": "Test-SPS",
+      "Description": "",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "11_DI8",
+          "asgn": "=",
+          "res": "LS8"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS8",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "FBHSPS1",
+      "Name": "FBH Ein/Aus",
+      "Description": "Hauptschalter für den Fußbodenheizungs-Mischkreis",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "!(11_DI1 | FBHSW0) & (11_DI2 | FBHSW1 | (FBHZP_OUT & !FBHZP_NOTE & !FBHCMPTAU_OUT) )",
+          "asgn": "=",
+          "res": "LS11"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS11",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "FBHSPS2",
+      "Name": "FBH Feed-Level",
+      "Description": "Auswahl VL-Speiseniveau - LS11=Anlage_Ein/Aus, TIM1~PID_OHW, TIM2~PID_OLW, LS14=VL_u, LS15=VL_o, CMP1=Tfeed<Twsp, ZP2=Ladefenster, LS16=Ladeanforderung",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "LS11 & FBHTIM1_OUT",
+          "asgn": "SET",
+          "res": "LS13"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS11 | FBHTIM2_OUT",
+          "asgn": "RST",
+          "res": "LS13"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS11 & !LS13",
+          "asgn": "=",
+          "res": "LS14"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS11 & LS13",
+          "asgn": "=",
+          "res": "LS15"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS15 & (FBHTIM1_OUT | FBHCMP1_OUT) & FBHZP2_OUT",
+          "asgn": "=",
+          "res": "LS16"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS13",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS14",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS15",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS16",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0BSPS1",
+      "Name": "R0B Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Büro EG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "23_DI1 | R0BSW0",
+          "asgn": "=",
+          "res": "LS231"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS231 & (23_DI2 | R0BSW1)",
+          "asgn": "=",
+          "res": "LS232"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS231 & R0BZP_OUT) | R0BTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS234"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS231",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS232",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS234",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0DSPS1",
+      "Name": "R0B Temp. Dusche EG",
+      "Description": "Hauptschalter für die Raumheizung in der Dusche EG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "R0DSW0",
+          "asgn": "=",
+          "res": "LS251"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS251 & (R0BSW1)",
+          "asgn": "=",
+          "res": "LS252"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS251 & R0DZP_OUT) | R0DTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS254"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS251",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS252",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS254",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0ESPS1",
+      "Name": "R0E Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Esszimmer EG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "13_DI7 | R0ESW0",
+          "asgn": "=",
+          "res": "LS221"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS221 & (13_DI8 | R0ESW1)",
+          "asgn": "=",
+          "res": "LS222"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS221 & R0EZP2_OUT) | R0ETLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS224"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS221",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS222",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS224",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0FSPS1",
+      "Name": "R0F OpMode",
+      "Description": "Frühstücksplatz EG, Steuerung der Betriebsart \"Dauer-Komfort\", \"Zeitprogramm\" oder \"Dauer-Aus/Auskühlschutz\"",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "21_DI1 | R0FSW0",
+          "asgn": "=",
+          "res": "LS241"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS241 & (21_DI2 | R0FSW1)",
+          "asgn": "=",
+          "res": "LS242"
+        },
+        {
+          "cmnt": "",
+          "expr": "TAUWARN1_OUT & (LS241 | (!LS241 & !R0KZP_OUT))",
+          "asgn": "=",
+          "res": "LS243"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS241 & R0KZP2_OUT) | R0KTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS244"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS241",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS242",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS243",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS244",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0SSPS1",
+      "Name": "R0S Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Schlafzimmer EG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "R0SSW0",
+          "asgn": "=",
+          "res": "LS261"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS261 & (R0SSW1)",
+          "asgn": "=",
+          "res": "LS262"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS261 & R0SZP_OUT) | R0STLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS264"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS261",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS262",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS264",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R0WSPS1",
+      "Name": "R0W Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Wohnzimmer EG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "13_DI5 | R0WSW0",
+          "asgn": "=",
+          "res": "LS211"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS211 & (13_DI6 | R0WSW1)",
+          "asgn": "=",
+          "res": "LS212"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS211 & R0WZP_OUT) | R0WTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS214"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS211",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS212",
+          "ls_log": false
+        },
+        {
+          "ls_name": "LS214",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "R1GSPS1",
+      "Name": "R1G Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Raum Gast OG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "12_DI6 | R1GSW0 | !12_DI8",
+          "asgn": "=",
+          "res": "LS131"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS131 & (12_DI7 | R1GSW1)",
+          "asgn": "=",
+          "res": "LS132"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS131 & R1GZP_OUT) | R1GTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS134"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS131",
+          "asgn": "=",
+          "res": "LS133"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS131",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS132",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS133",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS134",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "R1KSPS1",
+      "Name": "R1K Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im kleinen Zimmer OG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "14_DI3 | R1KSW0 | !14_DI5",
+          "asgn": "=",
+          "res": "LS141"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS141 & (14_DI4 | R1KSW1)",
+          "asgn": "=",
+          "res": "LS142"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS141 & R1KZP_OUT) | R1KTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS144"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS141",
+          "asgn": "=",
+          "res": "LS143"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS141",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS142",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS143",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS144",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "R1LSPS1",
+      "Name": "R1L Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Raum Lasse OG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "12_DI3 | R1LSW0 | !12_DI5",
+          "asgn": "=",
+          "res": "LS121"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS121 & (12_DI4 | R1LSW1)",
+          "asgn": "=",
+          "res": "LS122"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS121 & R1LZP_OUT) | R1LTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS124"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS121",
+          "asgn": "=",
+          "res": "LS123"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS121",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS122",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS123",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS124",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "R1MSPS1",
+      "Name": "R1M Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung im Raum Maike OG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "11_DI3 | R1MSW0 | !11_DI5",
+          "asgn": "=",
+          "res": "LS111"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS111 & (11_DI4 | R1MSW1)",
+          "asgn": "=",
+          "res": "LS112"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS111 & R1MZP_OUT) | R1MTLW_OUT | TAUWARN1_OUT ",
+          "asgn": "=",
+          "res": "LS114"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS111",
+          "asgn": "=",
+          "res": "LS113"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS111",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS112",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS113",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS114",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "R1YSPS1",
+      "Name": "R1Y Ein/Aus",
+      "Description": "Hauptschalter für die Raumheizung Raum Yannik OG",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "14_DI6 | R1YSW0 | !14_DI8",
+          "asgn": "=",
+          "res": "LS151"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS151 & (14_DI7 | R1YSW1)",
+          "asgn": "=",
+          "res": "LS152"
+        },
+        {
+          "cmnt": "",
+          "expr": "(!LS151 & R1YZP_OUT) | R1YTLW_OUT | TAUWARN1_OUT",
+          "asgn": "=",
+          "res": "LS154"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS151",
+          "asgn": "=",
+          "res": "LS153"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS151",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS152",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS153",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS154",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "RADSPS1",
+      "Name": "RAD Ein/Aus",
+      "Description": "Hauptschalter für den Radiator-Mischkreis",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "RADSWTD",
+          "asgn": "SET",
+          "res": "LS22"
+        },
+        {
+          "cmnt": "",
+          "expr": "AUXRSTD_OUT | RADSWRSTD",
+          "asgn": "RST",
+          "res": "LS22"
+        },
+        {
+          "cmnt": "",
+          "expr": "!(12_DI1 | RADSW0) & (12_DI2 | RADSW1 | ((RADTIM2_OUT | RADZP_OUT) & !RADCMPTAU_OUT & !LS22))",
+          "asgn": "=",
+          "res": "LS21"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS21",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS22",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "RADSPS2",
+      "Name": "RADviaRooms",
+      "Description": "Anforderung des Heizkörper-Heizkreises über die Raumregelungen\n=> obsolet, kann weg!",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "(LS114 & !R1MPID_OLW) | (LS124 & !R1LPID_OLW) | R1GPID_OHW | (LS144 & !R1KPID_OLW) | (LS154 & !R1YPID_OLW) | (LS244 & !R0FPID_OLW)",
+          "asgn": "=",
+          "res": "LS23"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS23",
+          "ls_log": false
+        }
+      ]
+    },
+    {
+      "ID": "REMSPS1",
+      "Name": "REM Hzg. on/off",
+      "Description": "",
+      "msw": 0,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "REMCMP1_OUT | (REMSW1 & !REMCMP2_OUT)",
+          "asgn": "=",
+          "res": "LS91"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS91",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "SOLOSPS1",
+      "Name": "SOLO SPS",
+      "Description": "1 - Ansteuerung der Solarpumpe vom Regler oder vom Softswitch oder von der Testschaltung.\n2 - Testpulsgenerator EIN (SET), wenn Startschwelle überschritten ist, keine Sperre während des Regelungsbetriebs greift und das Zeitfenster passt.\n3 - Testpulsgenerator AUS (RST), wenn Regelungsbetrieb läuft oder Zeitfenster endet.",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "SOLOPWM_OUT | SOLTO | SOLOTPG_OUT",
+          "asgn": "=",
+          "res": "LS81"
+        },
+        {
+          "cmnt": "",
+          "expr": "SOLOSTP_OUT & !SOLOETP_OUT & SOLOSUN_OUT & !SOLOQTP_OUT",
+          "asgn": "SET",
+          "res": "LS84"
+        },
+        {
+          "cmnt": "",
+          "expr": "!SOLOSTP_OUT & SOLOETP_OUT | !SOLOSUN_OUT | SOLOQTP_OUT",
+          "asgn": "RST",
+          "res": "LS84"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS81",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS84",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "SOLSSPS1",
+      "Name": "SOLS SPS",
+      "Description": "Ansteuerung der Solarpumpe entweder vom Regler oder von der Testschaltung.",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "SOLSPWM_OUT | SOLTS | SOLSTPG_OUT",
+          "asgn": "=",
+          "res": "LS82"
+        },
+        {
+          "cmnt": "",
+          "expr": "SOLSSTP_OUT & !SOLSETP_OUT & SOLSSUN_OUT & !SOLSQTP_OUT",
+          "asgn": "SET",
+          "res": "LS85"
+        },
+        {
+          "cmnt": "",
+          "expr": "!SOLSSTP_OUT & SOLSETP_OUT | !SOLSSUN_OUT | SOLSQTP_OUT",
+          "asgn": "RST",
+          "res": "LS85"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS82",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS85",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "SOLWSPS1",
+      "Name": "SOLW SPS",
+      "Description": "Ansteuerung der Solarpumpe entweder vom Regler oder von der Testschaltung.",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "SOLWPWM_OUT | SOLTW | SOLWTPG_OUT",
+          "asgn": "=",
+          "res": "LS83"
+        },
+        {
+          "cmnt": "",
+          "expr": "SOLWSTP_OUT & !SOLWETP_OUT & SOLWSUN_OUT & !SOLWQTP_OUT",
+          "asgn": "SET",
+          "res": "LS86"
+        },
+        {
+          "cmnt": "",
+          "expr": "!SOLWSTP_OUT & SOLWETP_OUT | !SOLWSUN_OUT | SOLWQTP_OUT",
+          "asgn": "RST",
+          "res": "LS86"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS83",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS86",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "SSPSPS2",
+      "Name": "SSP GK Ein / Aus",
+      "Description": "Anforderungen von BWW, RAD und FBH werden aggregiert; Gas-Kessel über LS75 (13_DO3) und SSPTIMGK (13_DO2, Nachlauf Netz) geschaltet.",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "LS71 | LS72 | LS73 | LS74",
+          "asgn": "SET",
+          "res": "LS75"
+        },
+        {
+          "cmnt": "",
+          "expr": "!(LS71 | LS72 | LS73 | LS731 | LS74 | LS741)",
+          "asgn": "RST",
+          "res": "LS75"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS75",
+          "ls_log": true
+        }
+      ]
+    },
+    {
+      "ID": "SSPSPS7",
+      "Name": "SSP GK Steuerung",
+      "Description": "Generierung der Anforderung des Gas-Kessels aus BWW, RAD und FBH.\n=> LS71=BWW, LS72=BWW(BeimStart), LS73=FBH, LS74=RAD",
+      "msw": 1,
+      "lines": [
+        {
+          "cmnt": "",
+          "expr": "BWWTIM1_OUT & !BWWSWECO & !BWWGK0_OUT & !BWWZP_NOTE & !(!LS18 | SSPCMP2_OUT)",
+          "asgn": "SET",
+          "res": "LS71"
+        },
+        {
+          "cmnt": "",
+          "expr": "BWWTIM4_OUT & BWWSWECO & BWWCMP3_OUT & !BWWGK0_OUT & !BWWZP_NOTE & !(!LS18 | SSPCMP2_OUT)",
+          "asgn": "SET",
+          "res": "LS71"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS18 | (SSPCMP2_OUT & !LS19)",
+          "asgn": "RST",
+          "res": "LS71"
+        },
+        {
+          "cmnt": "",
+          "expr": "BWWTIM2_OUT & BWWCMP2_OUT & !BWWSWECO",
+          "asgn": "SET",
+          "res": "LS72"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS18 | SSPCMP2_OUT",
+          "asgn": "RST",
+          "res": "LS72"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS11 & FBHZP2_OUT & FBHTIM5A_OUT ",
+          "asgn": "SET",
+          "res": "LS73"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS11 | (!FBHTIM5A_OUT & FBHCMP2_OUT & SSPCMP5_OUT)",
+          "asgn": "RST",
+          "res": "LS73"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS21 & RADTIM1_OUT",
+          "asgn": "SET",
+          "res": "LS74"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS21 | (!RADTIM1_OUT & SSPCMP3_OUT)",
+          "asgn": "RST",
+          "res": "LS74"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS11 & FBHZP2_OUT & FBHCMP4_OUT & LS75 & !LS73",
+          "asgn": "SET",
+          "res": "LS731"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS11 | (!FBHTIM5A_OUT & FBHCMP2_OUT & SSPCMP5_OUT)",
+          "asgn": "RST",
+          "res": "LS731"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS21 & RADCMP4_OUT & LS75 & !LS74",
+          "asgn": "SET",
+          "res": "LS741"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS21 | (!RADTIM1_OUT & SSPCMP3_OUT)",
+          "asgn": "RST",
+          "res": "LS741"
+        },
+        {
+          "cmnt": "",
+          "expr": "LS91 & REMTIM1_OUT & !REMCMP4_OUT",
+          "asgn": "SET",
+          "res": "LS76"
+        },
+        {
+          "cmnt": "",
+          "expr": "!LS91 | !REMTIM1_OUT | REMCMP4_OUT ",
+          "asgn": "RST",
+          "res": "LS76"
+        }
+      ],
+      "logging": [
+        {
+          "ls_name": "LS71",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS72",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS73",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS74",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS76",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS731",
+          "ls_log": true
+        },
+        {
+          "ls_name": "LS741",
+          "ls_log": true
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "ID": 11,
+      "Name": "Node 11",
+      "Description": "ID vom Carrier-Board",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "FBH - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "FBH - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "R1M - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "R1M - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "R1M - Fensterkontakt (1=\"Fenster ZU\") - z.Z. nicht angeschlossen",
+          "log": true
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "WRE - Werkstatt Remise Hand EIN",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "SOL Impulsgeber",
+          "log": true
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "FBH - Pumpe (LS11 mit Anlaufverzögerung bei Anlagenstart)",
+          "log": true,
+          "inp": "FBHTIM3_OUT"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "FBH - Mischer Laufrichtung ZU",
+          "log": true,
+          "inp": "FBHMVR_BWD"
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "FBH - Mischer Laufrichtung AUF",
+          "log": true,
+          "inp": "FBHMVR_FWD"
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "HK-Ventil Schlafzimmer EG",
+          "log": true,
+          "inp": "R0SPWM_OUT"
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "FBH - VL-Ventil unten (Zulauf kälter) (LS14 mit Nachlauf)",
+          "log": true,
+          "inp": "FBHTIM6_OUT"
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "FBH - VL-Ventil oben (Zulauf wärmer)",
+          "log": true,
+          "inp": "LS15"
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "HK-Ventil Maike OG",
+          "log": true,
+          "inp": "R1MPWM_OUT"
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "SOL-Impulsgeber Test-LED   (DO8PWM_OUT)",
+          "log": false,
+          "inp": "11_DI7"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "Außentemperatur von DX10XP1AO1",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "TAU Nord",
+          "log": true,
+          "fil": 600,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 1.2,
+          "toff": -1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "FBH Feed-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "FBH - RL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 0.8,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "FBH - VL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 0.8,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.5
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "RT Schlafzimmer EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.7
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "RT Maike OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -2.1
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "SOL Kollektor Vorlauf (WMZ)",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "SOL Kollektor Rücklauf (WMZ)",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -0.2
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "frei",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 12,
+      "Name": "Node 12",
+      "Description": "ID vom Carrier-Board",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "RAD - Hand AUS (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "RAD - Hand EIN (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "R1L - Hand AUS (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "R1L - Hand EIN (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "R1L - Fensterkontakt (1=\"Fenster ZU\")",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "R1G - Hand AUS (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "R1G - Hand EIN (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "R1G - Fensterkontakt (1=\"Fenster ZU\")",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "RAD - Pumpe",
+          "log": true,
+          "inp": "RADTIM3_OUT"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "RAD - Mischer Laufrichtung ZU (RADMVR_BWD)",
+          "log": true,
+          "inp": "RADMVR_BWD"
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "RAD - Mischer Laufrichtung AUF (RADMVR_FWD)",
+          "log": true,
+          "inp": "RADMVR_FWD"
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "nix dran",
+          "log": true,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "RAD - RL-Ventil unten",
+          "log": true,
+          "inp": "LS21"
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "RAD - RL-Ventil Mitte",
+          "log": true,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "RAD - RL-Ventil oben",
+          "log": true,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": true,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "SOL - VL-Temperatur gesamt (Speichereintritt oben)",
+          "log": true,
+          "fil": 10,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "RAD - Feed-Temperatur",
+          "log": true,
+          "fil": 45,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "RAD - RL-Temperatur",
+          "log": true,
+          "fil": 45,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "RAD - VL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "SOL Ost, VL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "SOL Süd, VL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "SOL West, VL-Temperatur",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "SOL - RL-Temperatur gesamt (Speicheraustritt unten)",
+          "log": true,
+          "fil": 120,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 13,
+      "Name": "Node 13",
+      "Description": "ID vom Carrier-Board",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "BWW - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "BWW - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "BWW - Taster für einmalige Anforderung - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "SOL Impulsgeber",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "R0W - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "R0W - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "R0E - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "R0E - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "BWW Zirkulationspumpe",
+          "log": true,
+          "inp": "LS19"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "Gaskessel Netzschalter",
+          "log": true,
+          "inp": "SSPTIMGK_OUT"
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "Gaskessel Steuerung",
+          "log": true,
+          "inp": "LS75"
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "SOL Ost, Pumpe",
+          "log": true,
+          "inp": "LS81"
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "SOL Süd, Pumpe",
+          "log": true,
+          "inp": "LS82"
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "SOL West, Pumpe",
+          "log": true,
+          "inp": "LS83"
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "SSP 1 Schichtspeichertemperatur (ganz oben)",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "SSP 2 Schichtspeichertemperatur",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "SSP 3 Schichtspeichertemperatur",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "SSP 4 Schichtspeichertemperatur",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "SSP 5 Schichtspeichertemperatur (ganz unten)",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "RL-Temp. Gaskessel (Kesseleintritt)",
+          "log": true,
+          "fil": 30,
+          "logm": true,
+          "logh": true,
+          "logl": true,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "SOL RL, Test für 12_RI8 --- GEPLANT: VL-Temp. Gaskessel (Kesselaustritt)",
+          "log": true,
+          "fil": 120,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 1.3
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "BWW Warmwasser RL-Temp. Zirkulation",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 10.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 14,
+      "Name": "Node 14",
+      "Description": "ID vom Carrier-Board",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "R0B - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "R0B - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "R1K - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "R1K - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "R1K - Fensterkontakt (1=\"Fenster ZU\") - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "R1Y - Hand AUS (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "R1Y - Hand EIN (Schalter Tableau) - z.Z. nicht angeschlossen",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "R1Y - Fensterkontakt (1=\"Fenster ZU\") - z.Z. nicht angeschlossen",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 21,
+      "Name": "Node 21",
+      "Description": "NC in der Abseite kl. Zimmer OG",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "R0K - Hand AUS (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "R0K- Hand EIN (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "HK-Regelventil Duschbad EG",
+          "log": false,
+          "inp": "R0DPWM_OUT"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "HK-Regelventil kl. Zimmer OG",
+          "log": false,
+          "inp": "R1KPWM_OUT"
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "HK-Regelventil Küche EG",
+          "log": false,
+          "inp": "R0KPWM_OUT"
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "HK-Regelventil Yannik OG",
+          "log": false,
+          "inp": "R1YPWM_OUT"
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "HK-Regelventil Frühstücksecke EG",
+          "log": false,
+          "inp": "R0FPWM_OUT"
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "#242_rt/sw",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "#242_ws/ge",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "LED Test",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "Raumtemp. Bad EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.8
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "Raumtemp. kl. Zimmer OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.9
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "Raumtemp. Küche EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "Raumtemp. Yannik OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.9
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "#241_ws/br",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "Raumtemp. Flur OG",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "#241_gn/ge",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "#241_gr/rs",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 22,
+      "Name": "Node  22",
+      "Description": "NC im Bad OG (Abluftanlage)",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "",
+          "log": true,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 23,
+      "Name": "Node 23",
+      "Description": "NC in der Abseite Lasse OG",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "R0B - Hand AUS (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "R0B - Hand EIN (Schalter Tableau)",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "HK-Regelventil Wohnzimmer EG",
+          "log": true,
+          "inp": "R0WPWM_OUT"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "HK-Regelventil Lasse OG",
+          "log": true,
+          "inp": "R1LPWM_OUT"
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "HK-Regelventil Büro EG",
+          "log": true,
+          "inp": "R0BPWM_OUT"
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "HK-Regelventil Gast OG",
+          "log": true,
+          "inp": "R1GPWM_OUT"
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "HK-Regelventil Esszimmer EG",
+          "log": true,
+          "inp": "R0EPWM_OUT"
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "Raumtemp. Wohnzimmer EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.7
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "Raumtemp. Lasse OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.1
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "Raumtemp. Büro EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -3.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "Raumtemp. Gast OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.5
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "Raumtemp. Esszimmer EG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -2.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "Raumtemp. Freiraum OG",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 60.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -1.6
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 24,
+      "Name": "Node 24",
+      "Description": "",
+      "adt": 300,
+      "cyt": 10.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "Test-LED",
+          "log": false,
+          "inp": "DO8PWM_OUT"
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    },
+    {
+      "ID": 31,
+      "Name": "Node 31",
+      "Description": "ID vom Carrier-Board",
+      "adt": 300,
+      "cyt": 1.0,
+      "dis": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false
+        }
+      ],
+      "dos": [
+        {
+          "ID": 1,
+          "dtyp": "S",
+          "com": "Heizungspumpe FB-Hzg. Remise  LS91",
+          "log": true,
+          "inp": "REMCMP1_OUT"
+        },
+        {
+          "ID": 2,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 3,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 4,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 5,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 6,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 7,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        },
+        {
+          "ID": 8,
+          "dtyp": "S",
+          "com": "",
+          "log": false,
+          "inp": 0
+        }
+      ],
+      "ais": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "Raumtemperatur Werkstatt",
+          "log": false,
+          "fil": 300,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "Raumfeuchte Werkstatt",
+          "log": false,
+          "fil": 300,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0
+        }
+      ],
+      "ris": [
+        {
+          "ID": 1,
+          "dtyp": "T",
+          "com": "VL-Temp. FBH Werkstatt",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": -0.4
+        },
+        {
+          "ID": 2,
+          "dtyp": "T",
+          "com": "RL-Temp. FBH Werkstatt",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "T",
+          "com": "Feed-Temp. FBH Werkstatt",
+          "log": true,
+          "fil": 60,
+          "logm": true,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 5,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 6,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 7,
+          "dtyp": "T",
+          "com": "",
+          "log": false,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        },
+        {
+          "ID": 8,
+          "dtyp": "T",
+          "com": "",
+          "log": true,
+          "fil": 10,
+          "logm": false,
+          "logh": false,
+          "logl": false,
+          "lgt": 1.0,
+          "styp": "Pt1000",
+          "roff": 0.0,
+          "toff": 0.0
+        }
+      ],
+      "aos": [
+        {
+          "ID": 1,
+          "dtyp": "V",
+          "com": "REM Mischer rempid1_out",
+          "log": false,
+          "inp": 9,
+          "lgt": 10.0
+        },
+        {
+          "ID": 2,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 3,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        },
+        {
+          "ID": 4,
+          "dtyp": "V",
+          "com": "",
+          "log": false,
+          "inp": 0,
+          "lgt": 1.0
+        }
+      ]
+    }
+  ],
+  "pids": [
+    {
+      "ID": "FBHPID1",
+      "Name": "FBH VL-Temp",
+      "Description": "Vorlauftemperatur-Regler für den Fußbodenheizungs-Mischkreis",
+      "msw": "LS11",
+      "cyt": 15.0,
+      "rev": 0,
+      "mpv": "11_RI4M",
+      "rsp": "FBHRAMP1_OUT",
+      "om0": 1,
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": 0,
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 12.0,
+      "ps3": 18.0,
+      "ps4": 32.0,
+      "pbd": 100.0,
+      "psf": 20.0,
+      "itm": 1200.0,
+      "dco": 25.0,
+      "dcor": 25.0,
+      "psh": 0,
+      "tsh": "FBHCALC3_OUT",
+      "dsh": "FBHRAMP3_OUT",
+      "dshr": "FBHRAMP3_OUT",
+      "hvt": 60.0,
+      "ohi": 95.0,
+      "oli": 28.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": true,
+      "log_ohw": true,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0BPID",
+      "Name": "R0B Temp. Büro EG",
+      "Description": "Raumtemperaturregelung für das Büro im EG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "23_RI3M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS231",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS232",
+      "omt": "R0BZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 19.0,
+      "pbd": 5.0,
+      "psf": 15.0,
+      "itm": 7200.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0DPID",
+      "Name": "R0D Temp. Dusche EG",
+      "Description": "Raumtemperaturregelung für die Dusche EG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "21_RI1M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS251",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS252",
+      "omt": "R0DZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 20.0,
+      "pbd": 4.0,
+      "psf": 10.0,
+      "itm": 3600.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0EPID",
+      "Name": "R0E Temp. Ess EG",
+      "Description": "Raumtemperaturregelung für das Esszimmer im EG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "23_RI5M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS221",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS222",
+      "omt": "R0EZP2_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 18.0,
+      "pbd": 4.0,
+      "psf": 25.0,
+      "itm": 14400.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0FPID",
+      "Name": "R0F Frühstück EG",
+      "Description": "Raumtemperaturregelung für die Frühstücksecke in der Küche EG",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "21_RI3M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS241",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS242",
+      "omt": "R0KZP2_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 19.0,
+      "pbd": 5.0,
+      "psf": 10.0,
+      "itm": 28800.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0KPID",
+      "Name": "R0K Küche EG",
+      "Description": "Raumtemperaturregelung für die Küche EG",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "21_RI3M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS241",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS242",
+      "omt": "R0KZP2_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 19.0,
+      "pbd": 5.0,
+      "psf": 10.0,
+      "itm": 28800.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0SPID",
+      "Name": "R0S Temp. Schlaf EG",
+      "Description": "Raumtemperaturregelung für das Schlafzimmer im EG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "11_RI5M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS261",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS262",
+      "omt": "R0SZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 19.0,
+      "pbd": 4.0,
+      "psf": 10.0,
+      "itm": 7200.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R0WPID",
+      "Name": "R0W Temp. Wohn EG",
+      "Description": "Raumtemperaturregelung für das Wohnzimmer im EG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "23_RI1M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS211",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS212",
+      "omt": "R0WZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 16.0,
+      "ps4": 19.0,
+      "pbd": 4.0,
+      "psf": 10.0,
+      "itm": 7200.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R1GPID",
+      "Name": "R1G Temp. Gast OG",
+      "Description": "Raumtemperaturregelung für das Gästezimmer im OG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "23_RI4M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS131",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS132",
+      "omt": "R1GZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 18.0,
+      "ps4": 20.0,
+      "pbd": 4.0,
+      "psf": 25.0,
+      "itm": 3600.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 0.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R1KPID",
+      "Name": "R1K Temp. kl. Z. OG",
+      "Description": "Raumtemperaturregelung für das kleine Zimmer im OG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "21_RI2M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS141",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS142",
+      "omt": "R1KZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 19.0,
+      "ps4": 21.0,
+      "pbd": 6.0,
+      "psf": 15.0,
+      "itm": 0.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R1LPID",
+      "Name": "R1L Temp. Lasse OG",
+      "Description": "Raumtemperaturregelung für Lasses Zimmer im OG.",
+      "msw": 1,
+      "cyt": 30.0,
+      "rev": 0,
+      "mpv": "23_RI2M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS121",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS122",
+      "omt": "R1LZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 18.0,
+      "ps4": 19.0,
+      "pbd": 4.0,
+      "psf": 15.0,
+      "itm": 7200.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R1MPID",
+      "Name": "R1M Temp. Maike OG",
+      "Description": "Raumtemperaturregelung für Maikes Zimmer im OG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "11_RI6M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS111",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS112",
+      "omt": "R1MZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 17.0,
+      "ps4": 21.0,
+      "pbd": 8.0,
+      "psf": 10.0,
+      "itm": 14400.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "R1YPID",
+      "Name": "R1Y Temp. Yannik OG",
+      "Description": "Raumtemperaturregelung für Raum Yannik OG.",
+      "msw": 1,
+      "cyt": 60.0,
+      "rev": 0,
+      "mpv": "21_RI4M",
+      "rsp": null,
+      "om0": 0,
+      "om1": "LS151",
+      "om2": "TAUWARN1_OUT",
+      "om3": 0,
+      "om4": "LS152",
+      "omt": "R1YZP_OUT",
+      "ps1": 8.0,
+      "ps2": 12.0,
+      "ps3": 19.0,
+      "ps4": 20.0,
+      "pbd": 4.0,
+      "psf": 10.0,
+      "itm": 3600.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 8.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "RADPID1",
+      "Name": "RAD VL-Temp",
+      "Description": "Vorlauftemperatur-Regler für den Heizkörper-Mischkreis",
+      "msw": "LS21",
+      "cyt": 15.0,
+      "rev": 0,
+      "mpv": "12_RI4M",
+      "rsp": "RADRAMP1_OUT",
+      "om0": 1,
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": 1,
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 12.0,
+      "ps3": 18.0,
+      "ps4": 42.0,
+      "pbd": 75.0,
+      "psf": 30.0,
+      "itm": 10800.0,
+      "dco": 30.0,
+      "dcor": 30.0,
+      "psh": "RADRAMP4_OUT",
+      "tsh": "RADCALC3_OUT",
+      "dsh": "RADRAMP3_OUT",
+      "dshr": "RADRAMP3_OUT",
+      "hvt": 120.0,
+      "ohi": 90.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": true,
+      "log_ohw": true,
+      "log_olw": true,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "REMPID1",
+      "Name": "REM VL-Temp",
+      "Description": "Vorlauftemperatur-Regelung für die Werkstatt-Fußbodenheizung\nmsw = LS91",
+      "msw": 0,
+      "cyt": 10.0,
+      "rev": 0,
+      "mpv": "31_RI1M",
+      "rsp": "REMRAMP2_OUT",
+      "om0": "! REMSW1",
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": "REMSW1",
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 15.0,
+      "ps3": 18.0,
+      "ps4": 30.0,
+      "pbd": 1600.0,
+      "psf": 5.0,
+      "itm": 1000000.0,
+      "dco": 0.0,
+      "dcor": 0.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 0.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "SOLOPID",
+      "Name": "SOLO PID",
+      "Description": "Regler Solarkollektor OST",
+      "msw": "SOLOSUN_OUT",
+      "cyt": 30.0,
+      "rev": 1,
+      "mpv": "12_RI5M",
+      "rsp": "SOLWSP2_OUT",
+      "om0": 1,
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": 0,
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 15.0,
+      "ps3": 18.0,
+      "ps4": 60.0,
+      "pbd": 600.0,
+      "psf": 5.0,
+      "itm": 43200.0,
+      "dco": 20.0,
+      "dcor": 5.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 120.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "SOLSPID",
+      "Name": "SOLS PID",
+      "Description": "Regler Solarkollektor SÜD",
+      "msw": "SOLSSUN_OUT",
+      "cyt": 30.0,
+      "rev": 1,
+      "mpv": "12_RI6M",
+      "rsp": "SOLWSP2_OUT",
+      "om0": 1,
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": 0,
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 15.0,
+      "ps3": 18.0,
+      "ps4": 60.0,
+      "pbd": 600.0,
+      "psf": 5.0,
+      "itm": 43200.0,
+      "dco": 60.0,
+      "dcor": 10.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 120.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    },
+    {
+      "ID": "SOLWPID",
+      "Name": "SOLW PID",
+      "Description": "Regler Solarkollektor WEST",
+      "msw": "SOLWSUN_OUT",
+      "cyt": 30.0,
+      "rev": 1,
+      "mpv": "12_RI7M",
+      "rsp": "SOLWSP2_OUT",
+      "om0": 1,
+      "om1": 0,
+      "om2": 0,
+      "om3": 0,
+      "om4": 0,
+      "omt": 0,
+      "ps1": 6.0,
+      "ps2": 15.0,
+      "ps3": 18.0,
+      "ps4": 60.0,
+      "pbd": 400.0,
+      "psf": 10.0,
+      "itm": 14400.0,
+      "dco": 50.0,
+      "dcor": 10.0,
+      "psh": 0,
+      "tsh": 0,
+      "dsh": 0,
+      "dshr": 0,
+      "hvt": 180.0,
+      "ohi": 100.0,
+      "oli": 0.0,
+      "log_out": true,
+      "log_wsp": true,
+      "log_cdn": false,
+      "log_ohw": false,
+      "log_olw": false,
+      "log_integral": true,
+      "log_p_inf": true,
+      "log_d_inf": true
+    }
+  ],
+  "calculators": [
+    {
+      "ID": "AC1",
+      "Name": "Analoger Festwert",
+      "Description": "analoge Konstante zu Testzwecken\n",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 60.0,
+      "itr": [
+        {
+          "ain": 1.0,
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "FBHCALC1",
+      "Name": "FBH absCDN",
+      "Description": "Ermittlung des Betrags der Regelabweichung von FBHPID1",
+      "msw": 1,
+      "ctyp": "MAX",
+      "cyt": 10.0,
+      "itr": [
+        {
+          "ain": "FBHPID1_CDN",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "FBHPID1_CDN",
+          "swi": 1,
+          "fac": -1.0
+        }
+      ],
+      "log_out": false
+    },
+    {
+      "ID": "FBHCALC3",
+      "Name": "FBH Tune i",
+      "Description": "(Quasi-)Deaktivierung des I-Anteils während der in FBHTIM4 definierten Einschaltphase, um einen Überschwinger beim Anlagenstart zu vermeinden.",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 15.0,
+      "itr": [
+        {
+          "ain": 14400.0,
+          "swi": "FBHTIM4_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": "FBHRAMP2_OUT",
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "FBHCALC4",
+      "Name": "FBH Def. dT (inaktiv)",
+      "Description": "\"Dynamische\" Berechnung eines Vergleichswertes zur Abschaltung des Gaskessel-Ladebetriebs, wenn die Lade-Anforderung durch den Fußbodenheizungs-Mischkreis erfolgte. Der Vergleichswert wird tageszeitabhängig angepasst, um die Ladungsmenge dem voraussichtlich zu erwartenden Bedarf anzupassen.",
+      "msw": 0,
+      "ctyp": "ADD",
+      "cyt": 60.0,
+      "itr": [
+        {
+          "ain": "13_RI5M",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": -5.0,
+          "swi": "SSPZP1_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": -1.0,
+          "swi": "SSPZP2_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": 2.0,
+          "swi": "SSPZP3_OUT",
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "FBHCALC5",
+      "Name": "FBH calc5",
+      "Description": "Berechnung/Festlegung einer \"vorteilhaften\" Abschlattemperatur des Speicher-Ladevorgangs. Berücksichtigt werden: Sollwert FBH, Tageszeit, Außentemperatur und ein manueller Offset..",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 60.0,
+      "itr": [
+        {
+          "ain": "FBHPID1_WSP",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "SSPPOLY2_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "SSPPOLY3_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": 2.0,
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "RADCALC1",
+      "Name": "RAD absCDN",
+      "Description": "Ermittlung des Betrags der Regelabweichung von RADPID1",
+      "msw": 1,
+      "ctyp": "MAX",
+      "cyt": 10.0,
+      "itr": [
+        {
+          "ain": "RADPID1_CDN",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "RADPID1_CDN",
+          "swi": 1,
+          "fac": -1.0
+        }
+      ],
+      "log_out": false
+    },
+    {
+      "ID": "RADCALC2",
+      "Name": "RAD AddPID_out",
+      "Description": "addiert alle Reglerausgänge der Raumregelungen, um eine Heizkreis-Anforderung detektieren zu können",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 60.0,
+      "itr": [
+        {
+          "ain": "R1GPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R1KPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R1LPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R1MPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R1YPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0FPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0KPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0DPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0SPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0WPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0EPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "R0BPID_OUT",
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "RADCALC3",
+      "Name": "RAD Tune i",
+      "Description": "Dyn. Anpassung des i-Anteils. Wert aus RAMP2 wird durchgereicht (Regelbetrieb), jedoch während einer Einschaltphase (TIM4) quasi neutralisiert, bis brauchbare Messwerte nach Anlagenstillstand vorliegen.",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 15.0,
+      "itr": [
+        {
+          "ain": 86400.0,
+          "swi": "RADTIM4_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": "RADRAMP2_OUT",
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "SOLBASE",
+      "Name": "SOLx Start-Basis",
+      "Description": "Berechnung einer Referenztemperatur (aus Außen- und Raumtemp.) als Vergleichswert zur Bestimmung des Anlagenstarts eines Solarkreises.\n(offensichtlich nicht genutzt)",
+      "msw": 1,
+      "ctyp": "MED",
+      "cyt": 10.0,
+      "itr": [
+        {
+          "ain": "11_RI1M",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": 24.0,
+          "swi": 1,
+          "fac": 3.0
+        }
+      ],
+      "log_out": false
+    },
+    {
+      "ID": "SOLTRLADD",
+      "Name": "SOLx TRL+x",
+      "Description": "Berechnung eines Mindest-Vorlauftemperatur-Sollwerts unter Berücksichtigung der Rücklauftemperatur.",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 120.0,
+      "itr": [
+        {
+          "ain": "11_RI8",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": 5.0,
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": false
+    },
+    {
+      "ID": "SOLWSP",
+      "Name": "SOLx Sollwert",
+      "Description": "Bestimmung des aktuellen Vorlauftemperatur-Sollwerts bei Solarbetrieb, abhängig von Jahreszeit und Schichtspeicher-Ladezustand.\nSOLCASE_OUT = 1 -> Sommerbetrieb\n13_RI2M = Speichertemperatur T2 (zweiter Fühler von oben)\n13_RI2M = Speichertemperatur T2 (unterster Fühler)\n",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 300.0,
+      "itr": [
+        {
+          "ain": "13_RI2M",
+          "swi": "SOLCASE_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": 10.0,
+          "swi": "SOLCASE_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": "13_RI5M",
+          "swi": "! SOLCASE_OUT",
+          "fac": 1.0
+        },
+        {
+          "ain": 10.0,
+          "swi": "! SOLCASE_OUT",
+          "fac": 1.0
+        }
+      ],
+      "log_out": false
+    },
+    {
+      "ID": "SOLWSP2",
+      "Name": "SOLx Sollwert+",
+      "Description": "Berücksichtigung der Solarkreis-Rücklauftemperatur. Es soll ein Mindest-Delta zwischen VL- und RL-Temp sichergestellt werden.",
+      "msw": 1,
+      "ctyp": "MAX",
+      "cyt": 120.0,
+      "itr": [
+        {
+          "ain": "SOLWSP_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": "SOLTRLADD_OUT",
+          "swi": 1,
+          "fac": 1.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "SOLWSPSUB",
+      "Name": "SOLx WSP-x",
+      "Description": "Berechnung der Starttemperatur für den Puls-Testbetrieb unter Berücksichtigung des aktuellen Vorlauf-Sollwerts.",
+      "msw": 1,
+      "ctyp": "ADD",
+      "cyt": 60.0,
+      "itr": [
+        {
+          "ain": "SOLWSP2_OUT",
+          "swi": 1,
+          "fac": 1.0
+        },
+        {
+          "ain": 24.0,
+          "swi": 1,
+          "fac": -1.0
+        }
+      ],
+      "log_out": true
+    }
+  ],
+  "schedulers": [
+    {
+      "ID": "AUXRSTD",
+      "Name": "AUX Reset",
+      "Description": "general daily/nightly reset pulse for cross-platform use",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nightly every day",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "03:30;1",
+            "03:31;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "BWWZP",
+      "Name": "BWW Zirk-Zeiten",
+      "Description": "Definition der Zeiten, in denen Brauch-Warmwasser durch Zirkulation komfortabel bereitgestellt wird.",
+      "msw": 1,
+      "adn": 0,
+      "adnt": 60,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "05:00;1",
+            "05:30;1",
+            "09:30;0",
+            "12:30;1",
+            "14:30;0",
+            "18:00;1",
+            "22:00;0"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": true
+    },
+    {
+      "ID": "FBHZP",
+      "Name": "FBH Zeitprogramm",
+      "Description": "Betriebszeiten des Niedrigtemperatur-Mischkreises (wird ggfs. von FBHSW0 oder Tableau übersteuert)",
+      "msw": 1,
+      "adn": 0,
+      "adnt": 120,
+      "tls": [
+        {
+          "Name": "Zeitplan \"täglich\"",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "05:00;1",
+            "09:00;1",
+            "16:00;1",
+            "22:00;0"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "FBHZP2",
+      "Name": "FBH Ladefenster",
+      "Description": "Der Mischkreis Fußbodenheizung darf bei mangelndem Temperaturniveau im Schichtspeicher nur innerhalb des Zeitfensters Nachladung anfordern. Dieses soll eine unnötig hohe Aufladung kurz vor \"Betriebsschluss\" vermeiden, die resultierenden Nachteile werden bewusst in Kauf genommen.",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "05:00;1",
+            "07:00;0",
+            "17:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R0BZP",
+      "Name": "R0B Zeitprogramm",
+      "Description": "Zeitprogramm Raum Büro EG",
+      "msw": "! LS231",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:35;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R0DZP",
+      "Name": "R0D Zeitprogramm",
+      "Description": "Zeitprogramm Duschbad EG",
+      "msw": "! LS251",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:35;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R0EZP",
+      "Name": "R0E Zeitprogramm",
+      "Description": "Zeitprogramm Raum Esszimmer EG",
+      "msw": "! LS221",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:34;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R0EZP2",
+      "Name": "R0E Betriebszeiten",
+      "Description": "Zeitprogramm Raum Esszimmer EG",
+      "msw": "! LS221",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "immer",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "07:30;3",
+            "19:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R0KZP",
+      "Name": "R0K Zeitprogramm",
+      "Description": "Zeitprogramm Küche und Frühstücksecke EG",
+      "msw": "! LS241",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:00;3",
+            "21:01;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R0KZP2",
+      "Name": "R0K Betriebszeiten",
+      "Description": "Zeitprogramm Küche und Frühstücksecke EG",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "neue Zeitleiste",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "07:30;3",
+            "19:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R0SZP",
+      "Name": "R0S Zeitprogramm",
+      "Description": "Zeitprogramm für das Schlafzimmer im EG",
+      "msw": "! LS261",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:33;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R0WZP",
+      "Name": "R0W Zeitprogramm",
+      "Description": "Zeitprogramm Raum Wohnzimmer EG",
+      "msw": "! LS211",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:33;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R1GZP",
+      "Name": "R1G Betriebszeiten",
+      "Description": "Zeitprogramm Raum Gast, OG\n!LS131 = LS133  :-/",
+      "msw": "LS133",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "immer",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "05:30;3",
+            "08:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R1KZP",
+      "Name": "R1K Betriebszeiten",
+      "Description": "Zeitprogramm kleines Zimmer, OG\n!LS141 = LS143  :-/",
+      "msw": "LS143",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "immer",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:05;3",
+            "19:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R1LZP",
+      "Name": "R1L Zeitprogramm",
+      "Description": "Zeitprogramm Raum Lasse, OG\n!LS121 = LS123  :-/",
+      "msw": "LS123",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Nutzungsprofil",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "07:00;3",
+            "09:00;2",
+            "19:00;1"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "R1MZP",
+      "Name": "R1M Zeitprogramm",
+      "Description": "Zeitprogramm Raum Maike, OG\n!LS111 = LS113  :-/",
+      "msw": "LS113",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:05;3",
+            "09:00;3",
+            "18:00;3",
+            "21:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "R1YZP",
+      "Name": "R1Y Zeitprogramm",
+      "Description": "Zeitprogramm Raum Yannik OG\n!LS151 = LS153  :-/",
+      "msw": "LS153",
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:30;3",
+            "08:00;2",
+            "19:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "RADZP",
+      "Name": "RAD Zeitprogramm",
+      "Description": "Betriebszeiten des Radiator-Mischkreises (wird ggfs. von RADSW0 oder Tableau übersteuert)",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "Zeitplan \"täglich\"",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "05:00;1",
+            "08:30;0",
+            "12:00;1",
+            "16:00;0"
+          ]
+        }
+      ],
+      "log_out": true,
+      "log_note": false
+    },
+    {
+      "ID": "SOLOZP",
+      "Name": "SOLO Zeit",
+      "Description": "not used",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "06:00;1",
+            "13:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "SOLSZP",
+      "Name": "SOLS Zeit",
+      "Description": "",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "08:00;1",
+            "17:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "SOLWZP",
+      "Name": "SOLW Zeit",
+      "Description": "",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "12:00;1",
+            "19:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "SSPZP1",
+      "Name": "SSP morgens (ungenutzt)",
+      "Description": "",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "04:00;1",
+            "12:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "SSPZP2",
+      "Name": "SSP mittags (ungenutzt)",
+      "Description": "",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "12:01;1",
+            "18:00;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "SSPZP3",
+      "Name": "SSP abends (ungenutzt)",
+      "Description": "",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "00:00;1",
+            "03:59;0",
+            "18:01;1",
+            "23:59;0"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    },
+    {
+      "ID": "BWWGK0",
+      "Name": "BWW Ladesperre",
+      "Description": "sperrt den GK-Start in den Nachtzeiten\n0 = Ladeanforderung erlaubt / 1 = Sperre aktiv",
+      "msw": 1,
+      "adn": "",
+      "adnt": null,
+      "tls": [
+        {
+          "Name": "täglich",
+          "valid": [
+            "0"
+          ],
+          "sce": [
+            "04:00;0",
+            "10:00;1"
+          ]
+        }
+      ],
+      "log_out": false,
+      "log_note": false
+    }
+  ],
+  "timers": [
+    {
+      "ID": "BWWTIM1",
+      "Name": "BWW GK Anforderung",
+      "Description": "Fordert Schichtspeicher-Nachladung an, wenn Zirkulations-Abschalttemperatur nach längerem Pumpenlauf nicht erreicht worden ist.",
+      "msw": 1,
+      "trg": "LS19",
+      "tim": 1500.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": true,
+      "log_tr": false
+    },
+    {
+      "ID": "BWWTIM2",
+      "Name": "SSP GK Anf. via BWW-Start",
+      "Description": "Timer generiert ein Zeitfenster bei Anlagenstart der BWW-Zirkulation, in dem die Schichtspeicher-Nachladung angefordert werden kann, falls die Speichertemperatur absehbar nicht ausreicht, um die Zirkulations-Zieltemperatur erreichen zu können. Damit wird die standardmäßige Anforderungsverzögerung bei regulärem Betrieb umgangen, so dass die Aufheizphase verkürzt wird.",
+      "msw": 1,
+      "trg": "LS18",
+      "tim": 2.0,
+      "rst": "! LS18",
+      "ttyp": "IMP",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "BWWTIM3",
+      "Name": "BWW Tast-EIN",
+      "Description": "einmalige manuelle Anforderung von \"heißem Wasser\" via 13_DI3",
+      "msw": 1,
+      "trg": "13_DI3",
+      "tim": 1.0,
+      "rst": 0,
+      "ttyp": "IMP",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "BWWTIM4",
+      "Name": "BWW GK Anf. ECO",
+      "Description": "Fordert Schichtspeicher-Nachladung an, wenn die Zirkulationstemperatur (BWWCMP3) im ECO-Mode nach längerem Pumpenlauf (tim) nicht erreicht worden ist.",
+      "msw": 1,
+      "trg": "LS19",
+      "tim": 1800.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": true,
+      "log_tr": false
+    },
+    {
+      "ID": "BWWTIM5",
+      "Name": "BWW GK Anforderung",
+      "Description": "Das Abschalten der Zirkulationspumpe wird - nach entsprechender Zeitverzögerung - genutzt, um den durch BWW getriggerten laufenden Ladebetrieb des SSP via Gaskessel zu beenden.  => inaktiv, Abschaltung (wieder) über SSPCMP2",
+      "msw": 0,
+      "trg": "! LS19",
+      "tim": 300.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": true,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM1",
+      "Name": "FBH TIM ohw",
+      "Description": "Verzögerung einer Reaktion, wenn der Reglerausgangswert die obere Warngrenze (OHW) in steigender Richtung überschreitet.",
+      "msw": 1,
+      "trg": "FBHPID1_OHW",
+      "tim": 300.0,
+      "rst": "! LS11",
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM2",
+      "Name": "FBH TIM olw",
+      "Description": "Verzögerung einer Reaktion, wenn der Reglerausgangswert die untere Warngrenze (OLW) in fallender Richtung überschreitet.",
+      "msw": 1,
+      "trg": "FBHPID1_OLW",
+      "tim": 30.0,
+      "rst": "! LS11",
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM3",
+      "Name": "FBH Start Delay1",
+      "Description": "Anlaufverzögerung der Pumpe nach Anlagenstart (Feed-Ventil wird geöffnet und Mischer fährt in eine \"günstige\" Startposition)",
+      "msw": 1,
+      "trg": "LS11",
+      "tim": 180.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM4",
+      "Name": "FBH Start Delay2",
+      "Description": "Dämpfung des I-Anteils in der Einschaltphase",
+      "msw": 1,
+      "trg": "LS11",
+      "tim": 240.0,
+      "rst": 0,
+      "ttyp": "IMP",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM5A",
+      "Name": "FBH Anf. Ladung SSP",
+      "Description": "Verzögerung für die Anforderung der Speichernachladung, wenn die Einspeisung bereits über den \"oberen Weg\" erfolgt und die Solltemperatur trotzdem nicht erreicht werden kann.",
+      "msw": 1,
+      "trg": "LS16",
+      "tim": 600.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "FBHTIM6",
+      "Name": "FBH trlVLu",
+      "Description": "Nachlauf unteres VL-Ventil bei Umschaltung auf oberes VL-Ventil (Mischbetrieb), um die Temp.-Störgröße auf den PID-Regler zu verkleinern",
+      "msw": "LS11",
+      "trg": "LS14",
+      "tim": 300.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "RADTIM1",
+      "Name": "RAD GKstart TIM ohw",
+      "Description": "Verzögerung einer Reaktion, wenn der Reglerausgangswert die obere Warngrenze (OHW) in steigender Richtung überschreitet.",
+      "msw": 1,
+      "trg": "RADPID1_OHW",
+      "tim": 300.0,
+      "rst": "! LS21",
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "RADTIM2",
+      "Name": "RADviaRooms",
+      "Description": "Verzögerung der Abschaltung des Heizkreislaufs, wenn \"der letzte Raum\" die Anforderung zurücknimmt.",
+      "msw": 1,
+      "trg": "RADTIM5_OUT",
+      "tim": 3600.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "RADTIM3",
+      "Name": "RAD Start Delay1",
+      "Description": "Anlaufverzögerung der Pumpe nach Anlagenstart (Return-Ventil wird geöffnet und Mischer fährt in eine \"günstige\" Startposition)",
+      "msw": 1,
+      "trg": "LS21",
+      "tim": 180.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "RADTIM4",
+      "Name": "RAD Start Delay2",
+      "Description": "Dämpfung des I-Anteils in der Einschaltphase",
+      "msw": 1,
+      "trg": "LS21",
+      "tim": 1200.0,
+      "rst": 0,
+      "ttyp": "IMP",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "RADTIM5",
+      "Name": "RADviaRooms",
+      "Description": "Verzögerung der Anforderung des Heizkreislaufs, um das Triggern infolge einer kurzen Regelschwankung infolge einer Sollwertänderung (z.B. \"Fenster Zu\") zu unterbinden.",
+      "msw": 1,
+      "trg": "RADCMP1_OUT",
+      "tim": 60.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "REMTIM1",
+      "Name": "REM GK",
+      "Description": "Verzögerung der Gaskesselanforderung",
+      "msw": 0,
+      "trg": "REMCMP3_OUT",
+      "tim": 1800.0,
+      "rst": 0,
+      "ttyp": "DLY",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "SOLOTIM1",
+      "Name": "SOLO Timer",
+      "Description": "Sperre des Testbetriebs/Testpulsgenerators während des PID-Regelbetriebs und einige Zeit danach.",
+      "msw": 1,
+      "trg": "SOLOETP_OUT",
+      "tim": 7200.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "SOLSTIM1",
+      "Name": "SOLS Timer",
+      "Description": "Sperre des \"Testbetriebs\", während und nachdem der PID-Regler regelt.",
+      "msw": 1,
+      "trg": "SOLSETP_OUT",
+      "tim": 7200.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "SOLWTIM1",
+      "Name": "SOLW Timer",
+      "Description": "Sperre des \"Testbetriebs\", während und nachdem der PID-Regler regelt.",
+      "msw": 1,
+      "trg": "SOLWETP_OUT",
+      "tim": 7200.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": false,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    },
+    {
+      "ID": "SSPTIMGK",
+      "Name": "SSP Nachlauf PuGK",
+      "Description": "Nachlauf Ladepumpe bei Kesselabschaltung",
+      "msw": 1,
+      "trg": "LS75",
+      "tim": 10.0,
+      "rst": 0,
+      "ttyp": "TRL",
+      "rtr": false,
+      "log_out": true,
+      "log_et": false,
+      "log_rt": false,
+      "log_tr": false
+    }
+  ],
+  "fwbws": [
+    {
+      "ID": "FBHMVR",
+      "Name": "FBH 3-PktMi",
+      "Description": "Mischeransteuerung im Fußbodenheizungs-Mischkreis",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "FBHPID1_OUT",
+      "rsg": null,
+      "dur": 90.0,
+      "bkl": 0.5,
+      "nez": 1.0,
+      "log_fwd": true,
+      "log_bwd": true
+    },
+    {
+      "ID": "RADMVR",
+      "Name": "RAD 3-PktMi",
+      "Description": "Mischeransteuerung im Radiator-Mischkreis",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "RADPID1_OUT",
+      "rsg": null,
+      "dur": 90.0,
+      "bkl": 0.5,
+      "nez": 1.0,
+      "log_fwd": true,
+      "log_bwd": true
+    }
+  ],
+  "comps": [
+    {
+      "ID": "BWWCMP1",
+      "Name": "BWW Zirk. Start/Stop",
+      "Description": "Regelung BWW-Zirkulation in Abhängigkeit der BWW-Temperatur in der Zirkulationsleitung. OUT=1 wenn Abschalttemperatur erreicht.",
+      "msw": "LS18",
+      "cyt": 30.0,
+      "ctyp": "GE",
+      "inp1": "13_RI8M",
+      "inp2": 47.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "BWWCMP2",
+      "Name": "SSP GK Ein via BWW-Start",
+      "Description": "Startet Schichtspeicher-Nachladung, wenn T3 im SSP (mittlere Höhe) bei Anlagenstart (mutmaßlich) nicht ausreichen wird.",
+      "msw": 1,
+      "cyt": 300.0,
+      "ctyp": "LE",
+      "inp1": "13_RI3M",
+      "inp2": 50.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "BWWCMP3",
+      "Name": "SSP GK Ein via BWW-Eco",
+      "Description": "Gibt Schichtspeicher-Nachladung frei, wenn im BWW-ECO-Modus die BWW-Zirkulationstemperatur unter inp2 liegt.",
+      "msw": "LS18",
+      "cyt": 30.0,
+      "ctyp": "LE",
+      "inp1": "13_RI8M",
+      "inp2": 42.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "FBHCMP1",
+      "Name": "FBH Feed vs. VL",
+      "Description": "Meldet, wenn die Feed-Temperatur unter den Sollwert der Vorlauftemperatur fällt (reagiert schneller als die Auswertung der Regelabweichung im PID-Regler).",
+      "msw": "LS15",
+      "cyt": 30.0,
+      "ctyp": "LE",
+      "inp1": "11_RI2M",
+      "inp2": "FBHPID1_WSP",
+      "hys": 0.5,
+      "log_out": false
+    },
+    {
+      "ID": "FBHCMP2",
+      "Name": "FBH GK-Aus via T4",
+      "Description": "Abschaltbedingung für / Mindesttemperatur an T4 (zweitunterster Fühler), um den durch FBH initiierten Ladebetrieb beenden zu können.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "13_RI4M",
+      "inp2": 58.0,
+      "hys": 0.0,
+      "log_out": false
+    },
+    {
+      "ID": "FBHCMP3",
+      "Name": "FBH inaktiv! GK-Aus via T5",
+      "Description": "NICHT AKTIV! Ersetzt durch SSPCMP5 in SSPSPS7\nAbschaltbedingung für / Mindesttemperatur an T5 (unterster Fühler), um den durch FBH initiierten Ladebetrieb beenden zu können.",
+      "msw": 0,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "13_RI5M",
+      "inp2": "FBHPID1_WSP",
+      "hys": 0.0,
+      "log_out": false
+    },
+    {
+      "ID": "FBHCMP4",
+      "Name": "FBH catch load",
+      "Description": "Vergleicher soll nahende GK-Anforderung erkennen und Bereitschaft zur Übernahme der Speicherladung signalisieren.\n(Archiv: inp1=13_RI4M, inp2=37.0)",
+      "msw": 1,
+      "cyt": 300.0,
+      "ctyp": "LE",
+      "inp1": "13_RI5M",
+      "inp2": "FBHCALC5_OUT",
+      "hys": 0.1,
+      "log_out": false
+    },
+    {
+      "ID": "FBHCMPTAU",
+      "Name": "FBH TAU-Abschaltung",
+      "Description": "deaktiviert den Fußboden-Heizkreislauf bei sommerlichen Außentemperaturen",
+      "msw": 1,
+      "cyt": 300.0,
+      "ctyp": "GE",
+      "inp1": "11_RI1M",
+      "inp2": 22.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0BTLW",
+      "Name": "R0B Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "23_RI3M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0DTLW",
+      "Name": "R0B Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "21_RI1M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0ETLW",
+      "Name": "R0E Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "23_RI5M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0KTLW",
+      "Name": "R0K Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "21_RI3M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0STLW",
+      "Name": "R0S Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "11_RI5M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0WTLW",
+      "Name": "R0W Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "23_RI1M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1GTLW",
+      "Name": "R1G Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "23_RI4M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1KTLW",
+      "Name": "R1K Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "21_RI2M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1LTLW",
+      "Name": "R1L Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "23_RI2M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1MTLW",
+      "Name": "R1M Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "11_RI6M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1YTLW",
+      "Name": "R1Y Temp. Low",
+      "Description": "Frostschutzwarnung, wenn die Raumtemperatur unter den Grenzwert \"inp2\" fällt. Aktiviert ggfs. den Regler, um mit Regelbetrieb eine Mindesttemperatur im Raum zu halten.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "21_RI4M",
+      "inp2": 6.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADCMP1",
+      "Name": "RAD PID-Thresh",
+      "Description": "Grenzwert für die Anforderung des Radiator-Heizkreislaufs.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "RADCALC2_OUT",
+      "inp2": 50.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADCMP4",
+      "Name": "RAD catch load",
+      "Description": "Vergleicher soll nahende GK-Anforderung erkennen und Bereitschaft zur Übernahme der Speicherladung signalisieren.",
+      "msw": 1,
+      "cyt": 300.0,
+      "ctyp": "LE",
+      "inp1": "13_RI3M",
+      "inp2": 40.0,
+      "hys": 0.1,
+      "log_out": false
+    },
+    {
+      "ID": "RADCMPTAU",
+      "Name": "RAD TAU-Abschaltung",
+      "Description": "deaktiviert den Heizkörper-Heizkreislauf bei sommerlichen Außentemperaturen",
+      "msw": 1,
+      "cyt": 300.0,
+      "ctyp": "GE",
+      "inp1": "11_RI1M",
+      "inp2": 22.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMCMP1",
+      "Name": "REM Frostschutz",
+      "Description": "Überwachung der Raumtemperatur, um ggfs. die Fußbodenheizung im Frostschutz-Betrieb zu aktivieren.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "LE",
+      "inp1": "REMRAMP1_OUT",
+      "inp2": 4.5,
+      "hys": 0.5,
+      "log_out": true
+    },
+    {
+      "ID": "REMCMP2",
+      "Name": "REM Nutzbetrieb",
+      "Description": "Zweipunktregelung der Raumtemperatur im Nutzbetrieb. Schaltet den Heizbetrieb bei Erreichen von {inp2} ab und gemäß {hys} wieder ein.",
+      "msw": 0,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "REMRAMP1_OUT",
+      "inp2": 16.0,
+      "hys": 2.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMCMP3",
+      "Name": "REM Anf. GK",
+      "Description": "msw = LS91",
+      "msw": 0,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "REMPID1_CDN",
+      "inp2": 2.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMCMP4",
+      "Name": "REM Absch. GK",
+      "Description": "",
+      "msw": 0,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "13_RI5M",
+      "inp2": 30.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLCASE",
+      "Name": "SOLx Sommer",
+      "Description": "Optimierungsfunktion für den Solarkollektor-Betrieb: In Zeiten mit mutmaßlich geringem Heizwärmebedarf wird der Solar-Sollwert angehoben, um primär BWW bereitstellen zu können.\nSOLCASE_OUT = 1 -> Sommerbetrieb",
+      "msw": 1,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "11_RI1M",
+      "inp2": 12.0,
+      "hys": 0.5,
+      "log_out": true
+    },
+    {
+      "ID": "SOLOETP",
+      "Name": "SOLO PulsEnde",
+      "Description": "Ende des Testbetriebs, wenn der PID-Regler \"aufgewacht\" ist und die Ansteuerung übernimmt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "SOLOPID_OUT",
+      "inp2": 1.0,
+      "hys": 0.9,
+      "log_out": false
+    },
+    {
+      "ID": "SOLOQTP",
+      "Name": "SOLO QuitPuls",
+      "Description": "Ende des Testbetriebs, wenn - z.B. in der \"nach-PID-Reglephase\" - die Vorlauftemperatur unter den Startwert des Testbetriebs sinkt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "LE",
+      "inp1": "12_RI5",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 0.1,
+      "log_out": false
+    },
+    {
+      "ID": "SOLOSTP",
+      "Name": "SOLO PulsStart",
+      "Description": "Start des \"Testbetriebs\" mit zur Ermittlung einer \"brauchbaren\" Vorlauf-Temperatur.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "12_RI5",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLSETP",
+      "Name": "SOLS PulsEnde",
+      "Description": "Ende des Testbetriebs, wenn der PID-Regler \"aufgewacht\" ist und die Ansteuerung übernimmt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "SOLSPID_OUT",
+      "inp2": 1.0,
+      "hys": 0.9,
+      "log_out": false
+    },
+    {
+      "ID": "SOLSQTP",
+      "Name": "SOLS QuitPuls",
+      "Description": "Ende des Testbetriebs, wenn - z.B. in der \"nach-PID-Reglephase\" - die Vorlauftemperatur unter den Startwert des Testbetriebs sinkt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "LE",
+      "inp1": "12_RI6",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 0.1,
+      "log_out": false
+    },
+    {
+      "ID": "SOLSSTP",
+      "Name": "SOLS PulsStart",
+      "Description": "Start des \"Testbetriebs\" mit zur Ermittlung einer \"brauchbaren\" Vorlauf-Temperatur.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "12_RI6",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLWETP",
+      "Name": "SOLW PulsEnde",
+      "Description": "Ende des Testbetriebs, wenn der PID-Regler \"aufgewacht\" ist und die Ansteuerung übernimmt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "SOLWPID_OUT",
+      "inp2": 1.0,
+      "hys": 0.9,
+      "log_out": false
+    },
+    {
+      "ID": "SOLWQTP",
+      "Name": "SOLW QuitPuls",
+      "Description": "Ende des Testbetriebs, wenn - z.B. in der \"nach-PID-Reglephase\" - die Vorlauftemperatur unter den Startwert des Testbetriebs sinkt.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "LE",
+      "inp1": "12_RI7",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 0.1,
+      "log_out": false
+    },
+    {
+      "ID": "SOLWSTP",
+      "Name": "SOLW PulsStart",
+      "Description": "Start des \"Testbetriebs\" mit zur Ermittlung einer \"brauchbaren\" Vorlauf-Temperatur.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "12_RI7",
+      "inp2": "SOLWSPSUB_OUT",
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SSPCMP1",
+      "Name": "SSP GK Aus via TRL",
+      "Description": "Abschaltung des Ladebetriebs über die Kesseleintrittstemperatur",
+      "msw": 1,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "13_RI6M",
+      "inp2": 33.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SSPCMP2",
+      "Name": "SSP GK Aus via BWW",
+      "Description": "Ladebetrieb-Abschalttemperatur an T4 (bei Anforderung durch BWW)",
+      "msw": "LS18",
+      "cyt": 300.0,
+      "ctyp": "GE",
+      "inp1": "13_RI4M",
+      "inp2": "SSPPOLY1_OUT",
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SSPCMP3",
+      "Name": "SSP GK Aus via RAD",
+      "Description": "Abschalttemperatur an T3 (bei Anforderung durch RAD)",
+      "msw": 1,
+      "cyt": 10.0,
+      "ctyp": "GE",
+      "inp1": "13_RI4M",
+      "inp2": 58.0,
+      "hys": 1.0,
+      "log_out": true
+    },
+    {
+      "ID": "SSPCMP4",
+      "Name": "SSP GK Aus via FBH (inaktiv)",
+      "Description": "\"dynamisch\" errechnete Abschalttemperatur an T4 (bei Anforderung durch FBH)",
+      "msw": 0,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "FBHCALC4_OUT",
+      "inp2": "FBHPID1_WSP",
+      "hys": 0.5,
+      "log_out": true
+    },
+    {
+      "ID": "SSPCMP5",
+      "Name": "SSP GK Aus via FBH",
+      "Description": "Abschaltung der Speicherladung (bei Anforderung durch FBH), wenn \"dynamisch\" errechnete Lade-Abschalttemperatur an T5 erreicht ist.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ctyp": "GE",
+      "inp1": "13_RI5M",
+      "inp2": "FBHCALC5_OUT",
+      "hys": 0.0,
+      "log_out": false
+    },
+    {
+      "ID": "TAUWARN1",
+      "Name": "TAU Kondensatschutz",
+      "Description": "Erhöhung der Stillstandstemperatur in den Räumen, um Kondensation an den Fenstern zu vermeiden.",
+      "msw": 1,
+      "cyt": 600.0,
+      "ctyp": "LE",
+      "inp1": "11_RI1M",
+      "inp2": -5.0,
+      "hys": 1.0,
+      "log_out": true
+    }
+  ],
+  "ramps": [
+    {
+      "ID": "FBHRAMP1",
+      "Name": "FBH-GenSP",
+      "Description": "Sollwertbestimmung für die Vorlauftemperatur des Fußbodenheizungs-Mischkreises in Abhängigkeit von der Außentemperatur",
+      "msw": 1,
+      "cyt": 300.0,
+      "inp": "11_RI1M",
+      "lox": -15.0,
+      "loy": 36.0,
+      "hix": 20.0,
+      "hiy": 22.0,
+      "log_out": true
+    },
+    {
+      "ID": "FBHRAMP2",
+      "Name": "FBH i-Opti",
+      "Description": "Dyn. Anpassung des i-Anteils von FBHPID1 in Abhängigkeit vom Betrag der Regelabweichung (FBHCALC1)",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "FBHCALC1_OUT",
+      "lox": 0.0,
+      "loy": 2400.0,
+      "hix": 4.0,
+      "hiy": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "FBHRAMP3",
+      "Name": "FBH D-Opti",
+      "Description": "Dyn. Anpassung des D-Anteils von FBHPID1 in Abhängigkeit von der Regelabweichung",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "FBHCALC1_OUT",
+      "lox": 0.3,
+      "loy": -25.0,
+      "hix": 5.0,
+      "hiy": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADRAMP1",
+      "Name": "RAD-GenSP",
+      "Description": "Sollwertbestimmung für die Vorlauftemperatur des Radiatorheizungs-Mischkreises in Abhängigkeit von der Außentemperatur",
+      "msw": 1,
+      "cyt": 600.0,
+      "inp": "11_RI1M",
+      "lox": -15.0,
+      "loy": 48.0,
+      "hix": 20.0,
+      "hiy": 28.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADRAMP2",
+      "Name": "RAD i-Opti",
+      "Description": "Dyn. Anpassung des i-Anteils von RADPID1 in Abhängigkeit vom Betrag der Regelabweichung (RADCALC1)",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "RADCALC1_OUT",
+      "lox": 0.0,
+      "loy": 10800.0,
+      "hix": 5.0,
+      "hiy": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADRAMP3",
+      "Name": "RAD D-Opti",
+      "Description": "Dyn. Anpassung des D-Anteils von RADPID1 in Abhängigkeit von der Regelabweichung",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "RADCALC1_OUT",
+      "lox": 0.3,
+      "loy": -30.0,
+      "hix": 5.0,
+      "hiy": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "RADRAMP4",
+      "Name": "RAD P-Opti",
+      "Description": "Dyn. Anpassung des P-Anteils von RADPID1 in Abhängigkeit von der Regelabweichung",
+      "msw": 1,
+      "cyt": 15.0,
+      "inp": "RADCALC1_OUT",
+      "lox": 0.5,
+      "loy": 1000.0,
+      "hix": 5.0,
+      "hiy": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "RAMPTAU",
+      "Name": "Tau-Rampe",
+      "Description": "Konvertierung 0 bis 10V (vom DX)  --->  -20 bis +40 °C  (Messbereich DX)",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "11_AI1M",
+      "lox": 0.0,
+      "loy": -20.0,
+      "hix": 10.0,
+      "hiy": 40.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMRAMP1",
+      "Name": "REM-T_Raum",
+      "Description": "Messbereichsanpassung 0-10V-Sensor",
+      "msw": 1,
+      "cyt": 300.0,
+      "inp": "31_AI1M",
+      "lox": 0.0,
+      "loy": 0.0,
+      "hix": 10.0,
+      "hiy": 40.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMRAMP2",
+      "Name": "REM-SollVL-Temp",
+      "Description": "Berechnung des VL-Temp-Sollwerts für Frostschutzbetrieb in Abhängikeit der Raumtemperatur",
+      "msw": 0,
+      "cyt": 10.0,
+      "inp": "REMRAMP1_OUT",
+      "lox": 0.0,
+      "loy": 18.0,
+      "hix": 8.0,
+      "hiy": 10.0,
+      "log_out": true
+    },
+    {
+      "ID": "REMRAMP3",
+      "Name": "REM-F_Raum",
+      "Description": "Messbereichsanpassung 0-10V-Sensor",
+      "msw": 0,
+      "cyt": 10.0,
+      "inp": "31_AI2M",
+      "lox": 0.0,
+      "loy": 10.0,
+      "hix": 10.0,
+      "hiy": 100.0,
+      "log_out": true
+    }
+  ],
+  "polys": [
+    {
+      "ID": "SSPPOLY1",
+      "Name": "SSP GK Aus via BWW",
+      "Description": "variable Abschaltgrenze des GK nach Anforderung durch BWW;\ninput für SSPCMP2",
+      "msw": 1,
+      "cyt": 300.0,
+      "ptyp": "time",
+      "inp": "",
+      "tpp": [
+        {
+          "xval": "06:00",
+          "yval": 65.0
+        },
+        {
+          "xval": "8:30",
+          "yval": 60.0
+        },
+        {
+          "xval": "12:15",
+          "yval": 65.0
+        },
+        {
+          "xval": "14:30",
+          "yval": 60.0
+        },
+        {
+          "xval": "17:00",
+          "yval": 65.0
+        },
+        {
+          "xval": "22:30",
+          "yval": 60.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "SSPPOLY2",
+      "Name": "SSP PolyTimeOfDay",
+      "Description": "Additive Komponente zur Bestimmung der Lade-Abschalttemperatur des Gaskessels in Abhängigkeit von der Tageszeit. Denkansatz: Am Anfang eines Tages (am Morgen) kann bzw. sollte mehr Ladung im Schichtspeicher vorgehalten werden als am Abend, da der Wärmeverbrauch tagsüber höher ist als in der Nacht. Der Ausgangswert wird als \"Grad Kelvin\" interpretiert.",
+      "msw": 1,
+      "cyt": 60.0,
+      "ptyp": "time",
+      "inp": "",
+      "tpp": [
+        {
+          "xval": "4:59",
+          "yval": 0.0
+        },
+        {
+          "xval": "5:00",
+          "yval": 15.0
+        },
+        {
+          "xval": "14:00",
+          "yval": 15.0
+        },
+        {
+          "xval": "19:00",
+          "yval": 0.0
+        }
+      ],
+      "log_out": true
+    },
+    {
+      "ID": "SSPPOLY3",
+      "Name": "SSP PolyAmbientTemp",
+      "Description": "Additive Komponente zur Bestimmung der Lade-Abschalttemperatur des Gaskessels in Abhängigkeit von der Außentemperatur. Denkansatz: \nJe niedriger die Außentemperatur ist, desto mehr Ladung sollte im Schichtspeicher vorgehalten werden, da der Wärmeverbrauch zur Beheizung steigt. Der Ausgangswert wird als \"Grad Kelvin\" interpretiert.",
+      "msw": 1,
+      "cyt": 10.0,
+      "ptyp": "analog",
+      "inp": "11_RI1M",
+      "tpp": [
+        {
+          "xval": -10.0,
+          "yval": 15.0
+        },
+        {
+          "xval": 5.0,
+          "yval": 0.0
+        }
+      ],
+      "log_out": false
+    }
+  ],
+  "pwms": [
+    {
+      "ID": "DO8PWM",
+      "Name": "LED-Oszillator",
+      "Description": "Ansteuerung der Test-LEDs an den DO8-Ausgängen der Nodes.",
+      "msw": 1,
+      "cyt": 10.0,
+      "inp": 10,
+      "per": 5.0,
+      "mih": 0.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": false
+    },
+    {
+      "ID": "R0BPWM",
+      "Name": "R0B Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Büro EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0BPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 42.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0DPWM",
+      "Name": "R0D Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Duschbad EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0DPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 55.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0EPWM",
+      "Name": "R0E Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Esszimmer EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0EPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 42.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0FPWM",
+      "Name": "R0F Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Frühstücksecke EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0FPID_OUT",
+      "per": 30.0,
+      "mih": 40.0,
+      "mah": 62.0,
+      "sot": 3600.0,
+      "pht": 180.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0KPWM",
+      "Name": "R0K Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Küche EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0KPID_OUT",
+      "per": 30.0,
+      "mih": 25.0,
+      "mah": 47.0,
+      "sot": 3600.0,
+      "pht": 180.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0SPWM",
+      "Name": "R0S Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Schlafzimmer EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0SPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 55.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R0WPWM",
+      "Name": "R0W Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Wohnzimmer EG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R0WPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 55.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1GPWM",
+      "Name": "R1G Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Raum Gast OG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R1GPID_OUT",
+      "per": 30.0,
+      "mih": 35.0,
+      "mah": 100.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1KPWM",
+      "Name": "R1K Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils im kleinen Zimmer OG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R1KPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 42.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1LPWM",
+      "Name": "R1L Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Raum Lasse OG. Die Parameter \"mih\", \"mah\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R1LPID_OUT",
+      "per": 30.0,
+      "mih": 30.0,
+      "mah": 60.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1MPWM",
+      "Name": "R1M Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils Raum Maike OG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R1MPID_OUT",
+      "per": 30.0,
+      "mih": 22.0,
+      "mah": 48.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "R1YPWM",
+      "Name": "R1Y Ventil",
+      "Description": "Pulsbreitenmodulator für den Thermoantrieb des Heizkörperventils im Raum Yannik OG. \"mih\" und \"pht\" wurden experimentell ermittelt, \"mah\" und \"sot\" sind frei gewählt/geraten.",
+      "msw": 1,
+      "cyt": 60.0,
+      "inp": "R1YPID_OUT",
+      "per": 30.0,
+      "mih": 40.0,
+      "mah": 60.0,
+      "sot": 3600.0,
+      "pht": 240.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLOPWM",
+      "Name": "SOLO PWM",
+      "Description": "Pulsbreitenmodulator Solarpumpe Kollektor Ost",
+      "msw": "SOLOSUN_OUT",
+      "cyt": 30.0,
+      "inp": "SOLOPID_OUT",
+      "per": 100.0,
+      "mih": 0.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLOTPG",
+      "Name": "SOLO PulsGen",
+      "Description": "\"Testpulsgenerator\" zur Ansteuerung der Pumpe, um Temperaturanstieg im Vorlauf bei beginnender Solarstrahlung detektieren zu können.",
+      "msw": "LS84",
+      "cyt": 60.0,
+      "inp": 4,
+      "per": 100.0,
+      "mih": 0.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLSPWM",
+      "Name": "SOLS PWM",
+      "Description": "Pulsbreitenmodulator Solarpumpe Kollektor Süd",
+      "msw": "SOLSSUN_OUT",
+      "cyt": 30.0,
+      "inp": "SOLSPID_OUT",
+      "per": 100.0,
+      "mih": 3.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLSTPG",
+      "Name": "SOLS PulsGen",
+      "Description": "\"Testpulsgenerator\" zur Ansteuerung der Pumpe, um Temperaturanstieg im Vorlauf bei beginnender Solarstrahlung detektieren zu können.",
+      "msw": "LS85",
+      "cyt": 60.0,
+      "inp": 4,
+      "per": 100.0,
+      "mih": 0.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLWPWM",
+      "Name": "SOLW PWM",
+      "Description": "Pulsbreitenmodulator Solarpumpe Kollektor West",
+      "msw": "SOLWSUN_OUT",
+      "cyt": 30.0,
+      "inp": "SOLWPID_OUT",
+      "per": 100.0,
+      "mih": 3.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    },
+    {
+      "ID": "SOLWTPG",
+      "Name": "SOLW PulsGen",
+      "Description": "\"Testpulsgenerator\" zur Ansteuerung der Pumpe, um Temperaturanstieg im Vorlauf bei beginnender Solarstrahlung detektieren zu können.",
+      "msw": "LS86",
+      "cyt": 5.0,
+      "inp": 4,
+      "per": 100.0,
+      "mih": 0.0,
+      "mah": 100.0,
+      "sot": 0.0,
+      "pht": 0.0,
+      "log_out": true
+    }
+  ],
+  "sun": [
+    {
+      "ID": "SOLOSUN",
+      "Name": "SOLO Winkel",
+      "Description": "Strahlungsfenster für Ost-Kollektor",
+      "msw": 1,
+      "cyt": 120.0,
+      "lat": 53.2833,
+      "lng": 10.5333,
+      "dir": 93.0,
+      "slp": 45.0,
+      "mel": 10.0,
+      "min": 20.0,
+      "log_out": true,
+      "log_ang": true,
+      "log_el": false,
+      "log_az": false
+    },
+    {
+      "ID": "SOLSSUN",
+      "Name": "SOLS Winkel",
+      "Description": "Strahlungsfenster für Süd-Kollektor",
+      "msw": 1,
+      "cyt": 120.0,
+      "lat": 53.2833,
+      "lng": 10.5333,
+      "dir": 183.0,
+      "slp": 50.0,
+      "mel": 10.0,
+      "min": 20.0,
+      "log_out": true,
+      "log_ang": true,
+      "log_el": false,
+      "log_az": false
+    },
+    {
+      "ID": "SOLWSUN",
+      "Name": "SOLW Winkel",
+      "Description": "Strahlungsfenster für West-Kollektor",
+      "msw": 1,
+      "cyt": 120.0,
+      "lat": 53.2833,
+      "lng": 10.5333,
+      "dir": 273.0,
+      "slp": 45.0,
+      "mel": 10.0,
+      "min": 20.0,
+      "log_out": true,
+      "log_ang": true,
+      "log_el": false,
+      "log_az": false
+    }
+  ],
+  "avg": [
+    {
+      "ID": "TAUAVGD",
+      "Name": "TAU MW täglich",
+      "Description": "",
+      "msw": 1,
+      "inp": "TAUAVGH_ITM",
+      "strt": "00:00",
+      "dur": 24.0,
+      "dist": 60.0,
+      "cyc": false,
+      "mms": 5,
+      "mmt": 15,
+      "log_out": true,
+      "log_itm": true
+    },
+    {
+      "ID": "TAUAVGH",
+      "Name": "TAU MW stündlich",
+      "Description": "",
+      "msw": 1,
+      "inp": "11_RI1M",
+      "strt": "00:00",
+      "dur": 1.0,
+      "dist": 1.0,
+      "cyc": true,
+      "mms": 9,
+      "mmt": 33,
+      "log_out": true,
+      "log_itm": true
+    }
+  ],
+  "emtr": [
+    {
+      "ID": "EMTRTEST",
+      "Name": "EMTR_Test",
+      "Description": "",
+      "msw": 1,
+      "ain1": 1.0,
+      "ain2": 1.0,
+      "iin": "11_DI7",
+      "fac": 1.0,
+      "unit": "Wh",
+      "pwru": "W",
+      "ctr": 0,
+      "sum": 0.0,
+      "last_change": 1773136618,
+      "change_type": "User",
+      "log_out": true,
+      "log_ctr": false,
+      "log_pwr": true
+    },
+    {
+      "ID": "SOLWMZ",
+      "Name": "SOL WM-Zähler",
+      "Description": "",
+      "msw": 1,
+      "ain1": "11_RI7M",
+      "ain2": "11_RI8M",
+      "iin": "11_DI7",
+      "fac": 1.2,
+      "unit": "Wh",
+      "pwru": "W",
+      "ctr": 7988,
+      "sum": 94482.22973228221,
+      "last_change": 1772803705,
+      "change_type": "Impuls",
+      "log_out": true,
+      "log_ctr": false,
+      "log_pwr": true
+    }
+  ],
+  "switches": [
+    {
+      "ID": "BWWSW0",
+      "Name": "BWW - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "BWWSW1",
+      "Name": "BWW - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von FBHSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "BWWSW1X",
+      "Name": "BWW - 1x Ein",
+      "Description": "Anforderung für \"ein Mal\" Aufheizung, Zirkulation schaltet sich nach Erreichen der Abschalttemperatur wieder ab.",
+      "for_event": true,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "BWWSWECO",
+      "Name": "BWW - eco",
+      "Description": "0 = Komfort-Betrieb, GK wird via BWWTIM1 getriggert.\n1 = Eco-Betrieb, GK wird nach Ablauf von BWWTIM1 erst dann getriggert, wenn die BWW-Zirkulationstemperatur unter den Grenzwert von BWWCMP3 (red. 40 °C) fällt.",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "FBHSW0",
+      "Name": "FBH - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "FBHSW1",
+      "Name": "FBH - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von FBHSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0BSW0",
+      "Name": "R0B - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0BSW1",
+      "Name": "R0B - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0BSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0DSW0",
+      "Name": "R0D - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0DSW1",
+      "Name": "R0D - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0DSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0ESW0",
+      "Name": "R0E - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0ESW1",
+      "Name": "R0E - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0ESW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0FSW0",
+      "Name": "R0F - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0FSW1",
+      "Name": "R0F - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0WSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0SSW0",
+      "Name": "R0S - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0SSW1",
+      "Name": "R0S - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0SSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0WSW0",
+      "Name": "R0W - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R0WSW1",
+      "Name": "R0W - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R0WSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1GSW0",
+      "Name": "R1G - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1GSW1",
+      "Name": "R1G - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R1GSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1KSW0",
+      "Name": "R1K - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1KSW1",
+      "Name": "R1K - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R1KSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1LSW0",
+      "Name": "R1L - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1LSW1",
+      "Name": "R1L - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R1LSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1MSW0",
+      "Name": "R1M - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1MSW1",
+      "Name": "R1M - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R1MSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1YSW0",
+      "Name": "R1Y - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "R1YSW1",
+      "Name": "R1Y - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von R1YSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "RADSW0",
+      "Name": "RAD - Hand-AUS",
+      "Description": "virtueller Tableau-Schalter \"Dauer AUS\" (übersteuert alle Einschalt-Anweisungen)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "RADSW1",
+      "Name": "RAD - Hand-EIN",
+      "Description": "virtueller Tableau-Schalter \"Dauer EIN\" (wird ggfs. von FBHSW0 oder Tableau übersteuert)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "RADSWRSTD",
+      "Name": "RAD RstEndDay",
+      "Description": "Terminate 'End-the-day-function'",
+      "for_event": true,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "RADSWTD",
+      "Name": "RAD EndDay",
+      "Description": "Let's call it a day! End heating mode for the actual day, mode will be reset trough nightly reset function.",
+      "for_event": true,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "REMSW1",
+      "Name": "REM Hand Ein",
+      "Description": "Manuelle Aktivierung der Werkstattbeheizung (Aufheizung auf ca. 16 °C für Arbeitszwecke)",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "SOLTO",
+      "Name": "SOL T Ost",
+      "Description": "Ansteuerung Solarpumpe Ost",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "SOLTS",
+      "Name": "SOL T Süd",
+      "Description": "Ansteuerung Solarpumpe Süd",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "SOLTW",
+      "Name": "SOL T West",
+      "Description": "Ansteuerung Solarpumpe West",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "TESTSW",
+      "Name": "TEST Schalter",
+      "Description": "...zur temporären Test-Nutzung",
+      "for_event": false,
+      "state": 0,
+      "log": true
+    },
+    {
+      "ID": "TESTSW1X",
+      "Name": "TEST Taster",
+      "Description": "",
+      "for_event": true,
+      "state": 0,
+      "log": true
+    }
+  ]
+}

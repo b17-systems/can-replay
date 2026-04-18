@@ -1,0 +1,16 @@
+[project]
+name = "can-replay"
+version = "0.1.0"
+description = "Tool to replay CAN logs onto a CAN bus"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "python-can>=4.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.15.11",
+    "ty>=0.0.31",
+]
